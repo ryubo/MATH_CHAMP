@@ -1,0 +1,6 @@
+{
+  "name": "兩位數加減法練習",
+  "description": "提供兩位數加減法練習，包含計時功能、答題速度、正確率統計與最高紀錄保存。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
