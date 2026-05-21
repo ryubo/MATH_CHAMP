@@ -226,8 +226,126 @@ export default function ActiveGame({
       {/* Main Grid matching layout of Vibrant Palette Theme */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
         
-        {/* Left Stats Column (3/12 widths) */}
-        <div className="md:col-span-3 flex flex-col gap-4">
+        {/* Center Task/Problem & Keypad Block (6/12 widths, Top in Mobile via order-1) */}
+        <div className="col-span-12 md:col-span-6 order-1 md:order-2 flex flex-col gap-4">
+          
+          {/* Problem Card */}
+          <div className="bg-white rounded-[40px] shadow-2xl flex-grow flex flex-col items-center justify-center relative overflow-hidden border-4 border-sky-200 py-8 px-6 min-h-[300px] md:min-h-[340px]">
+            {/* Corner decorator circle style */}
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-sky-50 rounded-full -z-10"></div>
+            
+            <AnimatePresence mode="wait">
+              {currentQuestion ? (
+                <motion.div
+                  key={currentQuestion.id}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.05 }}
+                  transition={{ duration: 0.15 }}
+                  className="text-center z-10 w-full"
+                >
+                  <div className="flex items-center justify-center gap-5 text-6xl sm:text-7xl md:text-8xl font-black text-sky-900 leading-none">
+                    <span className="font-mono">{currentQuestion.num1}</span>
+                    <span className="text-sky-305">{currentQuestion.operator}</span>
+                    <span className="font-mono">{currentQuestion.num2}</span>
+                  </div>
+
+                  {/* Centered Response spot */}
+                  <div className="mt-8 flex justify-center">
+                    <div className="relative">
+                      <div className={`w-52 h-20 bg-sky-50 border-4 rounded-[24px] text-center text-5xl font-black text-sky-950 flex items-center justify-center shadow-inner transition-colors duration-150 ${
+                        feedback === 'correct' ? 'border-emerald-400 bg-emerald-50/50 text-emerald-900' :
+                        feedback === 'incorrect' ? 'border-rose-400 bg-rose-50/50 text-rose-900' : 'border-sky-400'
+                      }`}>
+                        {userAnswerStr || '?'}
+                      </div>
+                      
+                      {/* Live visual check indicator */}
+                      {feedback === 'correct' && (
+                        <div className="absolute -right-3 -bottom-3 w-10 h-10 bg-emerald-400 rounded-full flex items-center justify-center text-white text-xl font-black shadow-lg border-2 border-white">
+                          ✓
+                        </div>
+                      )}
+                      {feedback === 'incorrect' && (
+                        <div className="absolute -right-3 -bottom-3 w-10 h-10 bg-rose-500 rounded-full flex items-center justify-center text-white text-sm font-black shadow-lg border-2 border-white font-mono">
+                          {currentQuestion.answer}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              ) : (
+                <p className="text-slate-400">正在生成題目...</p>
+              )}
+            </AnimatePresence>
+
+            <div className="mt-6 flex gap-4 w-full max-w-sm justify-center">
+              <button
+                onClick={handleSubmit}
+                disabled={userAnswerStr.trim() === ''}
+                className={`px-10 py-3.5 text-white font-black text-xl rounded-2xl shadow-xl transition border-b-8 flex-1 cursor-pointer select-none active:translate-y-1 active:border-b-4 ${
+                  userAnswerStr.trim() === ''
+                    ? 'bg-slate-300 border-slate-450 text-slate-105 opacity-60 cursor-not-allowed border-b-6'
+                    : 'bg-sky-500 hover:bg-sky-600 border-sky-700'
+                }`}
+              >
+                解答
+              </button>
+              <button
+                onClick={handleClear}
+                className="px-6 py-3 bg-slate-105 hover:bg-slate-200 text-slate-500 hover:text-slate-800 font-bold rounded-2xl border-b-4 border-slate-300 cursor-pointer active:translate-y-[1px]"
+              >
+                重填
+              </button>
+            </div>
+          </div>
+
+          {/* New Mobile/Desktop Beautiful Keypad component */}
+          <div className="bg-white p-5 rounded-[32px] shadow-xl border-4 border-sky-200 flex flex-col justify-center">
+            <div className="grid grid-cols-3 gap-2 max-w-sm mx-auto w-full">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+                <button
+                  key={num}
+                  type="button"
+                  onClick={() => handleNumberPress(num)}
+                  className="py-3 px-4 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-xl font-black font-mono rounded-2xl border-b-4 border-slate-250 transition text-slate-800 cursor-pointer flex items-center justify-center active:translate-y-[2px] active:border-b-2 select-none"
+                >
+                  {num}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={handleBackspace}
+                className="py-3 px-2 bg-rose-50 hover:bg-rose-100 active:bg-rose-200 text-xs font-black rounded-2xl border-b-4 border-rose-250 transition text-rose-600 cursor-pointer flex items-center justify-center active:translate-y-[2px] active:border-b-2 select-none"
+              >
+                修正 (⌫)
+              </button>
+              <button
+                type="button"
+                onClick={() => handleNumberPress(0)}
+                className="py-3 px-4 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-xl font-black font-mono rounded-2xl border-b-4 border-slate-250 transition text-slate-800 cursor-pointer flex items-center justify-center active:translate-y-[2px] active:border-b-2 select-none"
+              >
+                0
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={userAnswerStr.trim() === ''}
+                className={`py-3 px-2 text-xs font-black rounded-2xl border-b-4 transition cursor-pointer flex items-center justify-center active:translate-y-[2px] active:border-b-2 select-none ${
+                  userAnswerStr.trim() === ''
+                    ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed opacity-75'
+                    : 'bg-emerald-500 hover:bg-emerald-600 border-emerald-700 text-white shadow-md'
+                }`}
+              >
+                發射 (⏎)
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Left Stats Column (3/12 widths, Below in Mobile via order-2) */}
+        <div className="col-span-12 md:col-span-3 order-2 md:order-1 flex flex-col gap-4">
           
           {/* Live Stats badging */}
           <div className="bg-white p-5 rounded-[28px] shadow-lg border-b-4 border-purple-200 flex-grow flex flex-col justify-between">
@@ -282,81 +400,8 @@ export default function ActiveGame({
 
         </div>
 
-        {/* Center Task/Problem Block (6/12 widths) */}
-        <div className="md:col-span-6 flex flex-col gap-4">
-          <div className="bg-white rounded-[40px] shadow-2xl flex-grow flex flex-col items-center justify-center relative overflow-hidden border-4 border-sky-200 py-8 px-6 min-h-[360px] md:min-h-0">
-            {/* Corner decorator circle style */}
-            <div className="absolute -top-10 -right-10 w-40 h-40 bg-sky-50 rounded-full -z-10"></div>
-            
-            <AnimatePresence mode="wait">
-              {currentQuestion ? (
-                <motion.div
-                  key={currentQuestion.id}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 1.05 }}
-                  transition={{ duration: 0.15 }}
-                  className="text-center z-10 w-full"
-                >
-                  <div className="flex items-center justify-center gap-5 text-6xl sm:text-7xl md:text-8xl font-black text-sky-900 leading-none">
-                    <span className="font-mono">{currentQuestion.num1}</span>
-                    <span className="text-sky-305">{currentQuestion.operator}</span>
-                    <span className="font-mono">{currentQuestion.num2}</span>
-                  </div>
-
-                  {/* Centered Response spot */}
-                  <div className="mt-8 flex justify-center">
-                    <div className="relative">
-                      <div className={`w-52 h-24 bg-sky-50 border-4 rounded-[24px] text-center text-5xl font-black text-sky-950 flex items-center justify-center shadow-inner transition-colors duration-150 ${
-                        feedback === 'correct' ? 'border-emerald-400 bg-emerald-50/50 text-emerald-900' :
-                        feedback === 'incorrect' ? 'border-rose-400 bg-rose-50/50 text-rose-900' : 'border-sky-400'
-                      }`}>
-                        {userAnswerStr || '?'}
-                      </div>
-                      
-                      {/* Live visual check indicator */}
-                      {feedback === 'correct' && (
-                        <div className="absolute -right-3 -bottom-3 w-10 h-10 bg-emerald-400 rounded-full flex items-center justify-center text-white text-xl font-black shadow-lg border-2 border-white">
-                          ✓
-                        </div>
-                      )}
-                      {feedback === 'incorrect' && (
-                        <div className="absolute -right-3 -bottom-3 w-10 h-10 bg-rose-500 rounded-full flex items-center justify-center text-white text-sm font-black shadow-lg border-2 border-white font-mono">
-                          {currentQuestion.answer}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </motion.div>
-              ) : (
-                <p className="text-slate-400">正在生成題目...</p>
-              )}
-            </AnimatePresence>
-
-            <div className="mt-8 flex gap-4 w-full max-w-sm justify-center">
-              <button
-                onClick={handleSubmit}
-                disabled={userAnswerStr.trim() === ''}
-                className={`px-10 py-4.5 text-white font-black text-xl rounded-2xl shadow-xl transition border-b-8 flex-1 cursor-pointer select-none active:translate-y-1 active:border-b-4 ${
-                  userAnswerStr.trim() === ''
-                    ? 'bg-slate-300 border-slate-450 text-slate-100 opacity-60 cursor-not-allowed border-b-6'
-                    : 'bg-sky-500 hover:bg-sky-600 border-sky-700'
-                }`}
-              >
-                解答
-              </button>
-              <button
-                onClick={handleClear}
-                className="px-6 py-4 bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 font-bold rounded-2xl border-b-4 border-slate-300 cursor-pointer active:translate-y-[1px]"
-              >
-                重填
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Recent History & Numeric Keypad (3/12 widths) */}
-        <div className="md:col-span-3 flex flex-col gap-4">
+        {/* Right Recent History Block (3/12 widths, Below in Mobile via order-3) */}
+        <div className="col-span-12 md:col-span-3 order-3 md:order-3 flex flex-col gap-4">
           
           {/* Recent list panel */}
           <div className="bg-white p-5 rounded-[28px] shadow-lg border-b-4 border-blue-200 flex-grow flex flex-col justify-between">
@@ -381,27 +426,6 @@ export default function ActiveGame({
                   ))
                 )}
               </div>
-            </div>
-
-            {/* Quick Numeric block keypads on side */}
-            <div className="mt-4 pt-3 border-t border-slate-100 grid grid-cols-3 gap-1 px-1">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((num) => (
-                <button
-                  key={num}
-                  onClick={() => handleNumberPress(num)}
-                  className={`py-2 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-sm font-black font-mono rounded-lg transition text-slate-800 cursor-pointer ${
-                    num === 0 ? 'col-span-2' : ''
-                  }`}
-                >
-                  {num}
-                </button>
-              ))}
-              <button
-                onClick={handleBackspace}
-                className="py-2 bg-slate-200 hover:bg-slate-300 text-[10px] font-bold rounded-lg transition text-slate-700 cursor-pointer"
-              >
-                🫲
-              </button>
             </div>
           </div>
 
